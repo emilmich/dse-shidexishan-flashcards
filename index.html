@@ -33,7 +33,7 @@
             font-size: 1.8rem;
         }
         .card-container {
-            width: 90%;
+            width: 95%;
             max-width: 500px;
             height: 300px;
             perspective: 1000px;
@@ -61,16 +61,24 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 25px;
+            padding: 20px;
             box-sizing: border-box;
             border-radius: 12px;
             border: 1px solid #e1ede6;
         }
         .card-front {
             background-color: var(--card-front-bg);
-            font-size: 1.6rem;
+            font-size: clamp(1.1rem, 4.5vw, 1.6rem);
             font-weight: bold;
             color: #1c3d2e;
+            text-align: center;
+            white-space: nowrap; /* 強制文字在同一行內顯示 */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .card-front .highlight {
             color: #d35400;
@@ -106,9 +114,11 @@
         }
         .nav-buttons {
             display: flex;
-            gap: 20px;
+            gap: 12px;
             margin-top: 30px;
             align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         button {
             background-color: var(--primary-color);
@@ -118,7 +128,7 @@
             border-radius: 6px;
             font-size: 1rem;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, background-color 0.2s;
         }
         button:hover {
             opacity: 0.9;
@@ -126,13 +136,22 @@
         button:disabled {
             background-color: #bdc3c7;
             cursor: not-allowed;
+            opacity: 1;
+        }
+        .btn-random {
+            background-color: #d35400;
+        }
+        .btn-random:hover {
+            background-color: #e67e22;
         }
         .progress {
             font-size: 1rem;
             color: #7f8c8d;
+            min-width: 60px;
+            text-align: center;
         }
         .tips {
-            margin-top: 30px;
+            margin-top: 25px;
             font-size: 0.85rem;
             color: #95a5a6;
             text-align: center;
@@ -162,16 +181,23 @@
 
     <div class="nav-buttons">
         <button id="prev-btn">上一張</button>
-        <span class="progress" id="progress-text">1 / 60</span>
+        <button id="random-btn" class="btn-random">🎲 隨機抽問</button>
         <button id="next-btn">下一張</button>
+    </div>
+    
+    <div style="margin-top: 15px;">
+        <span class="progress" id="progress-text">1 / 60</span>
     </div>
 
     <div class="tips">
-        點擊卡片翻面溫習字詞
+        點擊卡片翻面 · 按「隨機抽問」打亂順序隨機出題
     </div>
 
     <script>
-        const cards = [{"front": "自余為[僇人]", "explain": "[名詞] 受刑的人，即罪人", "extra": "僇，通「戮」，恥辱"}, {"front": "居[是州]", "explain": "[名詞] 這個州，指永州", "extra": "是：指示代詞"}, {"front": "[恆]惴慄", "explain": "[副詞] 常常", "extra": ""}, {"front": "恆[惴慄]", "explain": "[形容詞] 恐懼不安", "extra": "難：恐懼；慄：發抖"}, {"front": "[其]隙也", "explain": "[連詞] 如果（表假設）", "extra": "非代詞用法，注意辨析"}, {"front": "其[隙]也", "explain": "[名詞] 空閒時間", "extra": "指公務之暇"}, {"front": "[施施]而行", "explain": "[形容詞] 慢步緩行的樣子", "extra": ""}, {"front": "[漫漫]而遊", "explain": "[形容詞] 不受拘束的樣子", "extra": ""}, {"front": "[日]與其徒", "explain": "[名詞作狀語] 每天", "extra": "時間名詞用作狀語"}, {"front": "窮[迴谿]", "explain": "[名詞] 曲折溪流", "extra": "谿同「溪」"}, {"front": "[窮]迴谿", "explain": "[動詞] 走到盡頭", "extra": "此處作動詞用，與題目「始得」呼應"}, {"front": "[披草]而坐", "explain": "[動詞短語] 分開草", "extra": "披：用手分開"}, {"front": "[傾壼]而醉", "explain": "[動詞短語] 倒盡壺裏的酒", "extra": "傾：倒出來"}, {"front": "[更相]枕以臥", "explain": "[副詞] 互相", "extra": ""}, {"front": "更相[枕]以臥", "explain": "[名詞作動詞] 以……為枕，即頭枕著", "extra": "名詞活用為動詞"}, {"front": "意有所[極]", "explain": "[動詞] 至，嚮往", "extra": ""}, {"front": "夢亦同[趣]", "explain": "[動詞] 通「趨」，往，赴", "extra": "通假字"}, {"front": "[覺]而起", "explain": "[動詞] 睡醒", "extra": ""}, {"front": "山水有[異態]者", "explain": "[名詞] 奇特的形狀", "extra": ""}, {"front": "而[未始]知西山之怪特", "explain": "[副詞] 未曾", "extra": ""}, {"front": "西山之[怪特]", "explain": "[形容詞] 奇異特別", "extra": ""}, {"front": "[因]坐法華西亭", "explain": "[介詞] 以，由於", "extra": ""}, {"front": "[始]指異之", "explain": "[副詞] 才", "extra": "與題目「始得」呼應"}, {"front": "始[指異之]", "explain": "[動詞短語] 指着它覺得它奇特", "extra": "異：意動用法"}, {"front": "[遂]命僕人", "explain": "[連詞] 於是", "extra": ""}, {"front": "[緣]染溪", "explain": "[介詞] 沿着", "extra": ""}, {"front": "[斫]榛莽", "explain": "[動詞] 砍伐", "extra": ""}, {"front": "箕踞而[遨]", "explain": "[動詞] 遊賞（用眼睛四處張望）", "extra": ""}, {"front": "皆在[衽席]之下", "explain": "[名詞] 坐墊、席子", "extra": ""}, {"front": "[岈然]窪然", "explain": "[形容詞] 山勢高峻的樣子", "extra": "承「高」"}, {"front": "岈然[窪然]", "explain": "[形容詞] 低陷的樣子", "extra": "承「下」"}, {"front": "若[垤]若穴", "explain": "[名詞] 小土堆（蟻封）", "extra": ""}, {"front": "[尺寸千里]", "explain": "[短語] 眼前尺寸之間，實際相隔千里", "extra": "極言西山之高"}, {"front": "[攢]蹙累積", "explain": "[動詞] 聚集在一起", "extra": ""}, {"front": "攢[蹙]累積", "explain": "[動詞] 緊縮在一起", "extra": ""}, {"front": "[莫得]遯隱", "explain": "[副詞短語] 沒有什麼能夠", "extra": "莫：沒有什麼；得：能"}, {"front": "莫得[遯隱]", "explain": "[動詞] 隱藏", "extra": "遯，同「遁」"}, {"front": "[縈青繚白]", "explain": "[短語] 青山縈迴，白水繚繞", "extra": "主謂式變動賓式"}, {"front": "外與天[際]", "explain": "[動詞] 接近、交會", "extra": ""}, {"front": "是山之[特立]", "explain": "[形容詞] 特別突出", "extra": ""}, {"front": "不與[培塿]為類", "explain": "[名詞] 小土丘（比喻平庸世俗）", "extra": ""}, {"front": "[悠悠乎]與灝氣俱", "explain": "[形容詞] 遼闊浩渺的樣子", "extra": "描寫空間廣大"}, {"front": "與[灝氣]俱", "explain": "[名詞] 同「浩氣」，天地間的大氣", "extra": "慢同「浩」"}, {"front": "與灝氣[俱]", "explain": "[動詞] 在一起", "extra": ""}, {"front": "而莫得其[涯]", "explain": "[名詞] 邊際", "extra": ""}, {"front": "[洋洋乎]與造物者遊", "explain": "[形容詞] 悠然自得、廣闊無際的樣子", "extra": "描寫時間永恆"}, {"front": "與[造物者]遊", "explain": "[名詞] 創造萬物的天地，大自然", "extra": ""}, {"front": "[引觴]滿酌", "explain": "[動詞短語] 拿起酒杯", "extra": ""}, {"front": "引觴[滿酌]", "explain": "[動詞短語] 斟滿酒", "extra": ""}, {"front": "[頹然]就醉", "explain": "[形容詞] 東倒西歪地（醉倒的樣子）", "extra": "頹：跌倒"}, {"front": "頹然[就]醉", "explain": "[動詞] 接近，進入（陷入醉態）", "extra": ""}, {"front": "[蒼然]暮色", "explain": "[形容詞] 灰暗的樣子（形容傍晚天色）", "extra": ""}, {"front": "而[猶]不欲歸", "explain": "[副詞] 還，仍然", "extra": ""}, {"front": "[心凝]形釋", "explain": "[動詞短語] 思想停止了（不再想任何事情）", "extra": ""}, {"front": "心凝[形釋]", "explain": "[動詞短語] 形體消散了（忘掉自己的存在）", "extra": ""}, {"front": "與[萬化]冥合", "explain": "[名詞] 萬物變化，指自然界萬物", "extra": ""}, {"front": "與萬化[冥合]", "explain": "[動詞] 不知不覺地融合為一體", "extra": ""}, {"front": "吾[嚮]之未始遊", "explain": "[名詞] 從前／以前", "extra": "與今義「方向」不同"}, {"front": "遊[於是]乎始", "explain": "[介詞短語] 從這裡／從此", "extra": "與現代漢語「於是」不同"}, {"front": "故為之文以[誌]", "explain": "[動詞] 記載（誌同「志」）", "extra": ""}];
+        const cards = [{"front": "自余為[僇人]", "explain": "[名詞] 受刑的人，即罪人", "extra": "僇，通「戮」，恥辱"}, {"front": "居[是州]", "explain": "[名詞] 這個州，指永州", "extra": "是：指示代詞"}, {"front": "[恆]惴慄", "explain": "[副詞] 常常", "extra": ""}, {"front": "恆[惴慄]", "explain": "[形容詞] 恐懼不安", "extra": "難：恐懼；慄：發抖"}, {"front": "[其]隙也", "explain": "[連詞] 如果（表假設）", "extra": "非代詞用法，注意辨析"}, {"front": "其[隙]也", "explain": "[名詞] 空閒時間", "extra": "指公務之暇"}, {"front": "[施施]而行", "explain": "[形容詞] 慢步緩行的樣子", "extra": ""}, {"front": "[漫漫]而遊", "explain": "[形容詞] 不受拘束的樣子", "extra": ""}, {"front": "[日]與其徒", "explain": "[名詞作狀語] 每天", "extra": "時間名詞用作狀語"}, {"front": "窮[迴谿]", "explain": "[名詞] 曲折溪流", "extra": "谿同「溪」"}, {"front": "[窮]迴谿", "explain": "[動詞] 走到盡頭", "extra": "此處作動詞用，與題目「始得」呼應"}, {"front": "[披草]而坐", "explain": "[動詞短語] 分開草", "extra": "披：用手分開"}, {"front": "[傾壼]而醉", "explain": "[動詞短語] 倒盡壺裏的酒", "extra": "傾：倒出來"}, {"front": "[更相]枕以臥", "explain": "[副詞] 互相", "extra": ""}, {"front": "更相[枕]以臥", "explain": "[名詞作動詞] 以……為枕，即頭枕著", "extra": "名詞活用為動詞"}, {"front": "意有所[極]", "explain": "[動詞] 至，嚮往", "extra": ""}, {"front": "夢亦同[趣]", "explain": "[動詞] 通「趨」，往，赴", "extra": "通假字"}, {"front": "[覺]而起", "explain": "[動詞] 睡醒", "extra": ""}, {"front": "山水有[異態]者", "explain": "[名詞] 奇特的形狀", "extra": ""}, {"front": "而[未始]知西山之怪特", "explain": "[副詞] 未曾", "extra": ""}, {"front": "西山之[怪特]", "explain": "[形容詞] 奇異特別", "extra": ""}, {"front": "[因]坐法華西亭", "explain": "[介詞] 以，由於", "extra": ""}, {"front": "[始]指異之", "explain": "[副詞] 才", "extra": "與題目「始得」呼應"}, {"front": "始[指異之]", "explain": "[動詞短語] 指着它覺得它奇特", "extra": "異：意動用法"}, {"front": "[遂]命僕人", "explain": "[連詞] 於是", "extra": ""}, {"front": "[緣]染溪", "explain": "[介詞] 沿著", "extra": ""}, {"front": "[斫]榛莽", "explain": "[動詞] 砍伐", "extra": ""}, {"front": "箕踞而[遨]", "explain": "[動詞] 遊賞（用眼睛四處張望）", "extra": ""}, {"front": "皆在[衽席]之下", "explain": "[名詞] 坐墊、席子", "extra": ""}, {"front": "[岈然]窪然", "explain": "[形容詞] 山勢高峻的樣子", "extra": "承「高」"}, {"front": "岈然[窪然]", "explain": "[形容詞] 低陷的樣子", "extra": "承「下」"}, {"front": "若[垤]若穴", "explain": "[名詞] 小土堆（蟻封）", "extra": ""}, {"front": "[尺寸千里]", "explain": "[短語] 眼前尺寸之間，實際相隔千里", "extra": "極言西山之高"}, {"front": "[攢]蹙累積", "explain": "[動詞] 聚集在一起", "extra": ""}, {"front": "攢[蹙]累積", "explain": "[動詞] 緊縮在一起", "extra": ""}, {"front": "[莫得]遯隱", "explain": "[副詞短語] 沒有什麼能夠", "extra": "莫：沒有什麼；得：能"}, {"front": "莫得[遯隱]", "explain": "[動詞] 隱藏", "extra": "遯，同「遁」"}, {"front": "[縈青繚白]", "explain": "[短語] 青山縈迴，白水繚繞", "extra": "主謂式變動賓式"}, {"front": "外與天[際]", "explain": "[動詞] 接近、交會", "extra": ""}, {"front": "是山之[特立]", "explain": "[形容詞] 特別突出", "extra": ""}, {"front": "不與[培塿]為類", "explain": "[名詞] 小土丘（比喻平庸世俗）", "extra": ""}, {"front": "[悠悠乎]與灝氣俱", "explain": "[形容詞] 遼闊浩渺的樣子", "extra": "描寫空間廣大"}, {"front": "與[灝氣]俱", "explain": "[名詞] 同「浩氣」，天地間的大氣", "extra": "灝，同「浩」"}, {"front": "與灝氣[俱]", "explain": "[動詞] 在一起", "extra": ""}, {"front": "而莫得其[涯]", "explain": "[名詞] 邊際", "extra": ""}, {"front": "[洋洋乎]與造物者遊", "explain": "[形容詞] 悠然自得、廣闊無際的樣子", "extra": "描寫時間永恆"}, {"front": "與[造物者]遊", "explain": "[名詞] 創造萬物的天地，大自然", "extra": ""}, {"front": "[引觴]滿酌", "explain": "[動詞短語] 拿起酒杯", "extra": ""}, {"front": "引觴[滿酌]", "explain": "[動詞短語] 斟滿酒", "extra": ""}, {"front": "[頹然]就醉", "explain": "[形容詞] 東倒西歪地（醉倒的樣子）", "extra": "頹：跌倒"}, {"front": "頹然[就]醉", "explain": "[動詞] 接近，進入（陷入醉態）", "extra": ""}, {"front": "[蒼然]暮色", "explain": "[形容詞] 灰暗的樣子（形容傍晚天色）", "extra": ""}, {"front": "而[猶]不欲歸", "explain": "[副詞] 還，仍然", "extra": ""}, {"front": "[心凝]形釋", "explain": "[動詞短語] 思想停止了（不再想任何事情）", "extra": ""}, {"front": "心凝[形釋]", "explain": "[動詞短語] 形體消散了（忘掉自己的存在）", "extra": ""}, {"front": "與[萬化]冥合", "explain": "[名詞] 萬物變化，指自然界萬物", "extra": ""}, {"front": "與萬化[冥合]", "explain": "[動詞] 不知不覺地融合為一體", "extra": ""}, {"front": "吾[嚮]之未始遊", "explain": "[名詞] 從前／以前", "extra": "與今義「方向」不同"}, {"front": "遊[於是]乎始", "explain": "[介詞短語] 從這裡／從此", "extra": "與現代漢語「於是」不同"}, {"front": "故為之文以[誌]", "explain": "[動詞] 記載（誌同「志」）", "extra": ""}];
+
+        let originalOrder = Array.from({length: cards.length}, (_, i) => i);
+        let currentOrder = [...originalOrder];
         let currentIndex = 0;
 
         const cardElement = document.getElementById('card-element');
@@ -184,18 +210,26 @@
         
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
+        const randomBtn = document.getElementById('random-btn');
 
         function formatFront(text) {
-            // Replace [xxx] with highlight span
             return text.replace(/\[([^\]]+)\]/g, '<span class="highlight">$1</span>');
         }
 
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
         function updateCard() {
-            // Reset rotation first
             cardElement.classList.remove('is-flipped');
             
             setTimeout(() => {
-                const item = cards[currentIndex];
+                const actualIndex = currentOrder[currentIndex];
+                const item = cards[actualIndex];
                 frontText.innerHTML = formatFront(item.front);
                 backExplain.textContent = item.explain;
                 
@@ -206,7 +240,7 @@
                     extraRow.style.display = 'none';
                 }
                 
-                progressText.textContent = `${currentIndex + 1} / ${cards.length}`;
+                progressText.textContent = (currentIndex + 1) + " / " + cards.length;
                 
                 prevBtn.disabled = currentIndex === 0;
                 nextBtn.disabled = currentIndex === cards.length - 1;
@@ -233,6 +267,19 @@
                 currentIndex++;
                 updateCard();
             }
+        });
+
+        // Random trigger (Shuffles order and goes to index 0)
+        randomBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            let shuffled = [...originalOrder];
+            shuffle(shuffled);
+            currentOrder = shuffled;
+            currentIndex = 0;
+            updateCard();
+            
+            randomBtn.style.opacity = 0.5;
+            setTimeout(() => randomBtn.style.opacity = 1, 100);
         });
 
         // Init
